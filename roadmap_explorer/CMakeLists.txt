@@ -112,12 +112,14 @@ add_library(${PROJECT_NAME}_frontier_search_plugins SHARED
 src/frontier_search/PluginBFSearch.cpp
 )
 ament_target_dependencies(${PROJECT_NAME}_frontier_search_plugins ${dependencies})
+target_link_libraries(${PROJECT_NAME}_frontier_search_plugins ${PROJECT_NAME}_frontier ${PROJECT_NAME}_utils)
 
 
 add_library(${PROJECT_NAME}_information_gain_plugins SHARED
 src/information_gain/CountBasedGain.cpp
 )
 ament_target_dependencies(${PROJECT_NAME}_information_gain_plugins ${dependencies})
+target_link_libraries(${PROJECT_NAME}_information_gain_plugins ${PROJECT_NAME}_frontier ${PROJECT_NAME}_utils)
 
 
 add_library(${PROJECT_NAME}_planner_plugins SHARED
@@ -131,6 +133,7 @@ src/planners/EuclideanPlugin.cpp
 src/planners/RandomDistancePlugin.cpp
 )
 ament_target_dependencies(${PROJECT_NAME}_planner_plugins ${dependencies})
+target_link_libraries(${PROJECT_NAME}_planner_plugins ${PROJECT_NAME}_frontier ${PROJECT_NAME}_utils)
 
 
 add_library(${PROJECT_NAME}_core SHARED
