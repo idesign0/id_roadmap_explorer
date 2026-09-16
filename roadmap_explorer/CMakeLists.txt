@@ -263,13 +263,19 @@ pluginlib_export_plugin_description_file(roadmap_explorer frontier_planner_plugi
 pluginlib_export_plugin_description_file(roadmap_explorer frontier_information_gain_plugins.xml)
 
 ########################### TESTS ###########################
-find_package(ament_cmake_gtest QUIET)
-if(ament_cmake_gtest_FOUND)
-    add_subdirectory(tests/utils)
-    add_subdirectory(tests/bt_plugins)
-    add_subdirectory(tests/frontier_search)
-    add_subdirectory(tests/information_gain)
-    add_subdirectory(tests/other_tests)
+# Gate tests on BUILD_TESTING (ament convention). They were only guarded by
+# ament_cmake_gtest_FOUND, so they built even with BUILD_TESTING=OFF and failed to link
+# against the CI's googletest (ABI/version skew: undefined testing::internal::AssertHelper
+# taking std::string_view). CI builds with BUILD_TESTING=OFF, so this skips them.
+if(BUILD_TESTING)
+    find_package(ament_cmake_gtest QUIET)
+    if(ament_cmake_gtest_FOUND)
+        add_subdirectory(tests/utils)
+        add_subdirectory(tests/bt_plugins)
+        add_subdirectory(tests/frontier_search)
+        add_subdirectory(tests/information_gain)
+        add_subdirectory(tests/other_tests)
+    endif()
 endif()
 
 ament_package()
