@@ -161,7 +161,12 @@ private:
 
   std::vector<geometry_msgs::msg::Point> points_;
   std::vector<std_msgs::msg::ColorRGBA> colors_;
-  std::chrono::_V2::system_clock::time_point start_time_;
+  // std::chrono::_V2 is a libstdc++-internal versioning namespace that libc++ does not
+  // provide -> "no member named '_V2' in namespace 'std::chrono'" (which then cascades into
+  // spurious "no matching member function" errors for this class). start_time_ is assigned
+  // from std::chrono::high_resolution_clock::now(), so use that clock's time_point (portable
+  // and the correct type on both libstdc++ and libc++).
+  std::chrono::high_resolution_clock::time_point start_time_;
   double total_distance_;
   size_t marker_id_;
   size_t point_count_;
