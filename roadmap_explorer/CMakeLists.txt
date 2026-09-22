@@ -103,6 +103,18 @@ add_library(${PROJECT_NAME}_utils SHARED
 src/util/EventLogger.cpp
 src/util/RosVisualizer.cpp
 src/Helpers.cpp
+# Parameters.cpp defines ParameterHandler's static members (parameterHandlerPtr_,
+# instanceMutex_), which the header's INLINE getInstance()/getValue<T>() reference -- so
+# every library whose sources include Parameters.hpp needs those definitions at link time.
+# It used to live in _core, but _core LINKS _planner_plugins, so _planner_plugins could not
+# link _core back (CMake rejects a cycle between SHARED libraries) and was left with
+# undefined symbols. Linux tolerates that in a .so (resolved at load); macOS does not:
+#   Undefined symbols for architecture arm64:
+#     "ParameterHandler::instanceMutex_", referenced from: ... FrontierRoadmap.cpp.o
+#   ld: symbol(s) not found -> libroadmap_explorer_planner_plugins.dylib fails to link.
+# Parameters.cpp includes nothing but Parameters.hpp, and _utils is already linked by every
+# plugin library and by _core, so hosting it here fixes all consumers without a cycle.
+src/Parameters.cpp
 )
 ament_target_dependencies(${PROJECT_NAME}_utils ${dependencies})
 target_link_libraries(${PROJECT_NAME}_utils ${PROJECT_NAME}_frontier)
@@ -138,7 +150,6 @@ target_link_libraries(${PROJECT_NAME}_planner_plugins ${PROJECT_NAME}_frontier $
 
 add_library(${PROJECT_NAME}_core SHARED
 src/CostAssigner.cpp
-src/Parameters.cpp
 src/Nav2Interface.cpp 
 src/FullPathOptimizer.cpp 
 src/SensorSimulator.cpp
