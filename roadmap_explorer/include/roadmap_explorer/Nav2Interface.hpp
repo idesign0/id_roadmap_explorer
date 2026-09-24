@@ -69,7 +69,14 @@ public:
   explicit Nav2Interface(
     std::shared_ptr<nav2_util::LifecycleNode> node, std::string action_name,
     std::string update_topic_name);
-  ~Nav2Interface();
+  // virtual: the class declares virtual methods (sendGoal, nav2GoalFeedbackCallback) and is held
+  // by shared_ptr, so destroying it through the polymorphic type with a non-virtual destructor is
+  // ill-formed under clang's -Wdelete-non-abstract-non-virtual-dtor, which ros2_control_cmake
+  // escalates to an error:
+  //   error: destructor called on non-final 'roadmap_explorer::Nav2Interface<...NavigateToPose>'
+  //   that has virtual functions but non-virtual destructor
+  // The vtable already exists, so this costs nothing and makes derived destruction correct.
+  virtual ~Nav2Interface();
   void goalPoseCallback(const geometry_msgs::msg::PoseStamped::SharedPtr msg);
   bool sendCancelWaitForResponse(action_msgs::srv::CancelGoal::Response & response);
   void cancelAllGoals();
